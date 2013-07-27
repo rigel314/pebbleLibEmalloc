@@ -1,11 +1,14 @@
-pebbleLibEmalloc
+Embedded malloc()
 ================
-
-My attempt at making a simple malloc() command for pebble.
+### Info
+My attempt at making a simple malloc() command for pebble.  And other embedded systems.
 
 It will operate on a staticly allocated buffer.  Inside the buffer it will keep track of used space and return pointers to unused space in the buffer.
 
 Refer to [malloc()](http://linux.die.net/man/3/malloc) for more details.
+
+### The name
+emalloc simply comes from **e**mbedded **malloc**().
 
 # Header
     struct emallocBufferInfo
