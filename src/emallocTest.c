@@ -32,7 +32,7 @@ void dump_up(ClickRecognizerRef recognizer, Window *window) {
 	ptr[29] = 0;
 	text_layer_set_text(&tl1, ptr);
 
-	snprintf(dbgMsg, 500, "%X", ptr-buffer);
+	snprintf(dbgMsg, 500, "%p\n%p", buffer, ptr);
 	text_layer_set_text(&dbg, dbgMsg);
 }
 
@@ -64,14 +64,14 @@ void handle_init(AppContextRef ctx)
 	ptr3[9] = 0;
 
 	text_layer_init(&tl1, GRect(0,0,144,15));
-	text_layer_set_text(&tl1, ptr1);
+	text_layer_set_text(&tl1, ptr3);
 	layer_add_child(&window.layer, &tl1.layer);
 
 	text_layer_init(&tl2, GRect(0,15,144,15));
 	text_layer_set_text(&tl2, ptr2);
 	layer_add_child(&window.layer, &tl2.layer);
 
-	snprintf(dbgMsg, 500, "%X\n%X\n%X", ptr1-buffer, ptr2-buffer, ptr3-buffer);
+	snprintf(dbgMsg, 500, "%p\n%p\n%p\n%p", buffer, ptr1, ptr2, ptr3);
 
 	text_layer_init(&dbg, GRect(0,30,144,168));
 	text_layer_set_text(&dbg, dbgMsg);
