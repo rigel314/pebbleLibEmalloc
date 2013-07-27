@@ -111,6 +111,8 @@ void* erealloc(struct emallocBufferInfo buf, void* point, size_t size)
 		return NULL;
 
 	memcpy(ptr, point, (size < oldsize) ? size : oldsize);
+
+	efree(buf, point);
 	return ptr;
 }
 /*
