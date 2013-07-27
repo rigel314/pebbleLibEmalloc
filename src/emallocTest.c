@@ -1,7 +1,6 @@
 #include "pebble_os.h"
 #include "pebble_app.h"
 #include "pebble_fonts.h"
-
 #include "emalloc.h"
 
 #define BUFF_SIZE 5000
@@ -33,7 +32,7 @@ void dump_up(ClickRecognizerRef recognizer, Window *window) {
 	ptr[29] = 0;
 	text_layer_set_text(&tl1, ptr);
 
-	snprintf(dbgMsg, 500, "%p\n%p", buffer, ptr);
+	snprintf(dbgMsg, 500, "%X", ptr-buffer);
 	text_layer_set_text(&dbg, dbgMsg);
 }
 
@@ -48,6 +47,7 @@ void handle_init(AppContextRef ctx)
 	window_init(&window, "Window Name");
 
 	setupEmallocBufferInfo(&emb, buffer, BUFF_SIZE);
+
 	char* ptr1 = emalloc(emb, 5);
 	for (int i = 0; i < 4; ++i)
 		ptr1[i] = 'a' + i;
@@ -55,7 +55,7 @@ void handle_init(AppContextRef ctx)
 
 	char* ptr2 = ecalloc(emb, 1, 5);
 	for (int i = 0; i < 4; ++i)
-		ptr2[i] = 'a' + i;
+		ptr2[i] = 'z' - i;
 	ptr2[4] = 0;
 
 	char* ptr3 = erealloc(emb, ptr1, 10);
@@ -63,17 +63,17 @@ void handle_init(AppContextRef ctx)
 		ptr3[i] = 'a' + i;
 	ptr3[9] = 0;
 
-	text_layer_init(&tl1, GRect(0,0,144,30));
-	text_layer_set_text(&tl1, ptr3);
+	text_layer_init(&tl1, GRect(0,0,144,15));
+	text_layer_set_text(&tl1, ptr1);
 	layer_add_child(&window.layer, &tl1.layer);
 
-	text_layer_init(&tl2, GRect(0,30,144,30));
+	text_layer_init(&tl2, GRect(0,15,144,15));
 	text_layer_set_text(&tl2, ptr2);
 	layer_add_child(&window.layer, &tl2.layer);
 
-	snprintf(dbgMsg, 500, "%p\n%p\n%p\n%p", buffer, ptr1, ptr2, ptr3);
+	snprintf(dbgMsg, 500, "%X\n%X\n%X", ptr1-buffer, ptr2-buffer, ptr3-buffer);
 
-	text_layer_init(&dbg, GRect(0,60,144,168));
+	text_layer_init(&dbg, GRect(0,30,144,168));
 	text_layer_set_text(&dbg, dbgMsg);
 	layer_add_child(&window.layer, &dbg.layer);
 

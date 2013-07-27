@@ -8,7 +8,6 @@
 #include "pebble_os.h"
 #include "pebble_app.h"
 #include "pebble_fonts.h"
-
 #include "emalloc.h"
 
 void setupEmallocBufferInfo(struct emallocBufferInfo* bufptr, char* buffer, uint32_t size)
@@ -25,21 +24,21 @@ void* emalloc(struct emallocBufferInfo buf, size_t size)
 	char* buffer = buf.start;
 	char* ptr;
 
-	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += i+4, i = *((uint32_t*) ptr))
+	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += (i&0x7FFFFFFF)+4, i = *((uint32_t*) ptr))
 	{
 		if (i & 0x80000000)
 			continue;
 
 		if (i >= size+4)
 		{
-			*((uint32_t*) ptr) = size & 0x80000000;
+			*((uint32_t*) ptr) = size | 0x80000000;
 			ptr += 4;
-			*((uint32_t*) ptr+4+size) = (i - (size + 4)) & 0x7FFFFFFF;
+			*((uint32_t*) (ptr+size)) = (i - (size + 4)) & 0x7FFFFFFF;
 			return ptr;
 		}
 		if (i >= size)
 		{
-			*((uint32_t*) ptr) = i & 0x80000000;
+			*((uint32_t*) ptr) = i | 0x80000000;
 			return ptr+4;
 		}
 	}
@@ -54,7 +53,7 @@ void combineFree(struct emallocBufferInfo buf)
 	char* lastptr = NULL;
 	int lasti;
 
-	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += i+4, i = *((uint32_t*) ptr))
+	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += (i&0x7FFFFFFF)+4, i = *((uint32_t*) ptr))
 	{
 		if (lastptr && !(i & 0x80000000) && !(lasti & 0x80000000))
 		{ // !(i & 0x80000000 || lasti & 0x80000000)
@@ -74,16 +73,15 @@ void efree(struct emallocBufferInfo buf, void* point)
 	char* buffer = buf.start;
 	char* ptr;
 
-	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += i+4, i = *((uint32_t*) ptr))
+	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += (i&0x7FFFFFFF)+4, i = *((uint32_t*) ptr))
 	{
 		if (ptr == point-4)
 		{
 			*((uint32_t*) ptr) = i & 0x7FFFFFFF;
+			combineFree(buf);
 			return;
 		}
 	}
-
-	combineFree(buf);
 
 	return;
 }
@@ -97,12 +95,20 @@ void* ecalloc(struct emallocBufferInfo buf, size_t nmemb, size_t size)
 	return ptr;
 }
 
+/**
+*	TODO: When making smaller, don't move?
+*	TODO: When making larger, check for free space after?
+*/
 void* erealloc(struct emallocBufferInfo buf, void* point, size_t size)
 {
 	if (size == 0)
 	{
 		efree(buf, point);
 		return NULL;
+	}
+	if (!point)
+	{
+		return emalloc(buf, size);
 	}
 	uint32_t oldsize = *((uint32_t*) point-4);
 	char* ptr = emalloc(buf, size);
