@@ -25,7 +25,7 @@ void* emalloc(struct emallocBufferInfo buf, size_t size)
 	char* buffer = buf.start;
 	char* ptr;
 
-	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size; ptr += i+4, i = *((uint32_t*) ptr))
+	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += i+4, i = *((uint32_t*) ptr))
 	{
 		if (i & 0x80000000)
 			continue;
@@ -40,15 +40,27 @@ void* emalloc(struct emallocBufferInfo buf, size_t size)
 		if (i >= size)
 		{
 			*((uint32_t*) ptr) = i & 0x80000000;
-			ptr += 4;
-			return ptr;
+			return ptr+4;
 		}
 	}
 	return NULL;
 }
 
-void efree(struct emallocBufferInfo buf, void* ptr)
+void efree(struct emallocBufferInfo buf, void* point)
 {
+	uint32_t i;
+	char* buffer = buf.start;
+	char* ptr;
+
+	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += i+4, i = *((uint32_t*) ptr))
+	{
+		if (ptr == point-4)
+		{
+			*((uint32_t*) ptr) = i & 0x7FFFFFFF;
+			return;
+		}
+	}
+
 	return;
 }
 
@@ -57,7 +69,7 @@ void* ecalloc(struct emallocBufferInfo buf, size_t nmemb, size_t size)
 	return NULL;
 }
 
-void* erealloc(struct emallocBufferInfo buf, void* ptr, size_t size)
+void* erealloc(struct emallocBufferInfo buf, void* point, size_t size)
 {
 	return NULL;
 }
