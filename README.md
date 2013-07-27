@@ -18,19 +18,19 @@ emalloc simply comes from **e**mbedded **malloc**().
     };
 
     void setupEmallocBufferInfo(struct emallocBufferInfo* bufptr, char* buffer, uint32_t size);
-    	Initializes the buffer and the info struct to be used with this malloc suite.
+		Initializes the buffer and the info struct to be used with this malloc suite.
 
     void* emalloc(struct emallocBufferInfo buf, size_t size);
-    	Acts like malloc().  *buf* must have been initialized with setupEmallocBufferInfo().
+		Acts like malloc().  *buf* must have been initialized with setupEmallocBufferInfo().
 
     void efree(struct emallocBufferInfo buf, void* ptr);
-    	Acts like free().  *buf* must have been initialized with setupEmallocBufferInfo().
+		Acts like free().  *buf* must have been initialized with setupEmallocBufferInfo().
 
     void* ecalloc(struct emallocBufferInfo buf, size_t nmemb, size_t size);
-    	Acts like calloc().  *buf* must have been initialized with setupEmallocBufferInfo().
+		Acts like calloc().  *buf* must have been initialized with setupEmallocBufferInfo().
 
     void* erealloc(struct emallocBufferInfo buf, void* ptr, size_t size);
-    	Acts like realloc().  *buf* must have been initialized with setupEmallocBufferInfo().
+		Acts like realloc().  *buf* must have been initialized with setupEmallocBufferInfo().
 
 #Implementation
 At present, my implementation is as follows:
