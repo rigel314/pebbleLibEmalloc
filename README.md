@@ -7,6 +7,15 @@ It will operate on a staticly allocated buffer.  Inside the buffer it will keep 
 
 Refer to [malloc()](http://linux.die.net/man/3/malloc) for more details.
 
+For use on other systems, you need the following librarys:
+* stdint.h
+	* uint32_t and the like
+* stddef.h
+	* size_t
+* string.h
+	* memcpy()
+	* memset()
+
 ### The name
 emalloc simply comes from **e**mbedded **malloc**().
 
