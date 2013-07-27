@@ -32,6 +32,9 @@ void dump_up(ClickRecognizerRef recognizer, Window *window) {
 			ptr[i] = 'z';
 	ptr[29] = 0;
 	text_layer_set_text(&tl1, ptr);
+
+	snprintf(dbgMsg, 500, "%p\n%p", buffer, ptr);
+	text_layer_set_text(&dbg, dbgMsg);
 }
 
 void click_config_provider(ClickConfig **config, Window *window) {
@@ -45,30 +48,30 @@ void handle_init(AppContextRef ctx)
 	window_init(&window, "Window Name");
 
 	setupEmallocBufferInfo(&emb, buffer, BUFF_SIZE);
-	char* ptr = emalloc(emb, 5);
+	char* ptr1 = emalloc(emb, 5);
 	for (int i = 0; i < 4; ++i)
-		ptr[i] = 'a' + i;
-	ptr[4] = 0;
+		ptr1[i] = 'a' + i;
+	ptr1[4] = 0;
 
 	char* ptr2 = ecalloc(emb, 1, 5);
 	for (int i = 0; i < 4; ++i)
 		ptr2[i] = 'a' + i;
 	ptr2[4] = 0;
 
-	ptr = erealloc(emb, ptr, 10);
+	char* ptr3 = erealloc(emb, ptr1, 10);
 	for (int i = 0; i < 9; ++i)
-		ptr[i] = 'a' + i;
-	ptr[9] = 0;
+		ptr3[i] = 'a' + i;
+	ptr3[9] = 0;
 
 	text_layer_init(&tl1, GRect(0,0,144,30));
-	text_layer_set_text(&tl1, ptr);
+	text_layer_set_text(&tl1, ptr3);
 	layer_add_child(&window.layer, &tl1.layer);
 
 	text_layer_init(&tl2, GRect(0,30,144,30));
 	text_layer_set_text(&tl2, ptr2);
 	layer_add_child(&window.layer, &tl2.layer);
 
-	snprintf(dbgMsg, 500, "%X\n%X\n%X\n", buffer, ptr, ptr2);
+	snprintf(dbgMsg, 500, "%p\n%p\n%p\n%p", buffer, ptr1, ptr2, ptr3);
 
 	text_layer_init(&dbg, GRect(0,60,144,168));
 	text_layer_set_text(&dbg, dbgMsg);
@@ -76,7 +79,7 @@ void handle_init(AppContextRef ctx)
 
 	window_set_click_config_provider(&window, (ClickConfigProvider) click_config_provider);
 
-	efree(emb, ptr);
+	efree(emb, ptr3);
 	efree(emb, ptr2);
 
 	window_stack_push(&window, true);
