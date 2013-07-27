@@ -60,7 +60,6 @@ void combineFree(struct emallocBufferInfo buf)
 		{ // !(i & 0x80000000 || lasti & 0x80000000)
 			*((uint32_t*) lastptr) = (i + lasti + 4) & 0x7FFFFFFF;
 			lasti = (i + lasti + 4) & 0x7FFFFFFF;
-			lastptr = lastptr;
 			continue;
 		}
 
