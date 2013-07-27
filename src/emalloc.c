@@ -46,6 +46,29 @@ void* emalloc(struct emallocBufferInfo buf, size_t size)
 	return NULL;
 }
 
+void combineFree(struct emallocBufferInfo buf)
+{
+	uint32_t i;
+	char* buffer = buf.start;
+	char* ptr;
+	char* lastptr = NULL;
+	int lasti;
+
+	for(ptr = buffer, i = *((uint32_t*) ptr); ptr < buffer+buf.size-1; ptr += i+4, i = *((uint32_t*) ptr))
+	{
+		if (lastptr && !(i & 0x80000000) && !(lasti & 0x80000000))
+		{ // !(i & 0x80000000 || lasti & 0x80000000)
+			*((uint32_t*) lastptr) = (i + lasti + 4) & 0x7FFFFFFF;
+			lasti = (i + lasti + 4) & 0x7FFFFFFF;
+			lastptr = lastptr;
+			continue;
+		}
+
+		lasti = i;
+		lastptr = ptr;
+	}
+}
+
 void efree(struct emallocBufferInfo buf, void* point)
 {
 	uint32_t i;
@@ -61,20 +84,39 @@ void efree(struct emallocBufferInfo buf, void* point)
 		}
 	}
 
+	combineFree(buf);
+
 	return;
 }
 
 void* ecalloc(struct emallocBufferInfo buf, size_t nmemb, size_t size)
 {
-	return NULL;
+	char* ptr = emalloc(buf, nmemb * size);
+	if (!ptr)
+		return NULL;
+	memset(ptr, 0, nmemb * size);
+	return ptr;
 }
 
 void* erealloc(struct emallocBufferInfo buf, void* point, size_t size)
 {
-	return NULL;
-}
+	if (size == 0)
+	{
+		efree(buf, point);
+		return NULL;
+	}
+	uint32_t oldsize = *((uint32_t*) point-4);
+	char* ptr = emalloc(buf, size);
+	if (!ptr)
+		return NULL;
 
+	memcpy(ptr, point, (size < oldsize) ? size : oldsize);
+	return ptr;
+}
+/*
 void edfrag(struct emallocBufferInfo buf)
 {
+	combineFree(buf);
 	return;
 }
+*/
